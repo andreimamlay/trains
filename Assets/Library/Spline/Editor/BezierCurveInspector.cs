@@ -19,6 +19,12 @@ namespace Trains.Library.Spline
 
         private int selectedIndex = -1;
 
+        private static Color[] modeColors = {
+            Color.white,
+            Color.yellow,
+            Color.cyan
+        };
+
         private void OnSceneGUI()
         {
             spline = target as BezierSpline;
@@ -35,8 +41,9 @@ namespace Trains.Library.Spline
                 var p2 = ShowPoint(i + 1);
                 var p3 = ShowPoint(i + 2);
 
-                Handles.color = Color.cyan;
+                Handles.color = modeColors[(int)spline.GetControlPointMode(i)];
                 Handles.DrawLine(p0, p1);
+                Handles.color = modeColors[(int)spline.GetControlPointMode(i + 1)];
                 Handles.DrawLine(p2, p3);
 
                 Handles.DrawBezier(p0, p3, p1, p2, Color.white, null, 4f);
@@ -79,6 +86,17 @@ namespace Trains.Library.Spline
 
                 spline.SetControlPoint(selectedIndex, handleTransform.InverseTransformPoint(point));
             }
+
+            EditorGUI.BeginChangeCheck();
+
+            var mode = (BezierControlPointMode)EditorGUILayout.EnumPopup("Mode", spline.GetControlPointMode(selectedIndex));
+            if (EditorGUI.EndChangeCheck())
+            {
+                Undo.RecordObject(spline, "Change Point Mode");
+                EditorUtility.SetDirty(spline);
+
+                spline.SetControlPointMode(selectedIndex, mode);
+            }
         }
 
         private Vector3 ShowPoint(int index)
@@ -86,7 +104,7 @@ namespace Trains.Library.Spline
             var point = handleTransform.TransformPoint(spline.GetControlPoint(index));
 
             var size = HandleUtility.GetHandleSize(point);
-            Handles.color = Color.white;
+            Handles.color = modeColors[(int)spline.GetControlPointMode(index)];
             if (Handles.Button(point, handleRotation, size * handleSize, size * pickSize, Handles.DotHandleCap))
             {
                 selectedIndex = index;

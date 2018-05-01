@@ -11,6 +11,9 @@ namespace Trains.Library.Spline
         [SerializeField]
         private Vector3[] points;
 
+        [SerializeField]
+        private BezierControlPointMode[] modes;
+
         public int ControlPointCount
         {
             get
@@ -29,6 +32,17 @@ namespace Trains.Library.Spline
             points[index] = point;
         }
 
+        public BezierControlPointMode GetControlPointMode(int index)
+        {
+            return modes[(index + 1) / 3];
+        }
+
+        public void SetControlPointMode(int index, BezierControlPointMode mode)
+        {
+            modes[(index + 1) / 3] = mode;
+        }
+
+
         public int CurveCount
         {
             get
@@ -45,6 +59,12 @@ namespace Trains.Library.Spline
                 new Vector3(2f, 0f, 0f),
                 new Vector3(3f, 0f, 0f),
                 new Vector3(4f, 0f, 0f)
+            };
+
+            modes = new[]
+            {
+                BezierControlPointMode.Free,
+                BezierControlPointMode.Free
             };
         }
 
@@ -104,6 +124,9 @@ namespace Trains.Library.Spline
 
             point.x += 1f;
             points[points.Length - 1] = point;
+
+            Array.Resize(ref modes, modes.Length + 1);
+            modes[modes.Length - 1] = modes[modes.Length - 2];
         }
     }
 }
